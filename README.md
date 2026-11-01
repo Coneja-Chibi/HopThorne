@@ -10,7 +10,7 @@ You set the basics once (tense, viewpoint, length, your model, genres) and switc
 
 ## Get it
 
-Visit the [HopThorne website](https://coneja-chibi.github.io/HopThorne/) or download [`HopThorne v1.json`](presets/HopThorne%20v1.json).
+Visit the [HopThorne website](https://coneja-chibi.github.io/HopThorne/) or download [`HopThorne v1.json`](HopThorne%20v1.json).
 
 1. In SillyTavern, import the file as a **Chat Completion preset**.
 2. Turn on **Macros 2.0** (the Experimental Macro Engine).
