@@ -1,18 +1,30 @@
-function callText(tool) {
-  return '[tool_call]\nname = ' + JSON.stringify(tool.name) + '\n\n[tool_call.arguments]\n' + tool.fields.filter(field => field.value !== undefined).map(field => JSON.stringify(field.key) + ' = ' + JSON.stringify(field.value)).join('\n');
+function callText(tool, args = exampleArguments) {
+  return JSON.stringify({ name: tool.identifier, arguments: args }, null, 2);
+}
+function appendJsonLine(node, line) {
+  let offset = 0;
+  for (const match of line.matchAll(/"(?:\\.|[^"\\])*"|\b(?:true|false|null|\d+)\b/g)) {
+    node.append(document.createTextNode(line.slice(offset, match.index)));
+    const span = document.createElement('span');
+    span.className = 'json-' + (match[0].startsWith('"') ? line.slice(match.index + match[0].length).trimStart().startsWith(':') ? 'key' : 'string' : 'literal');
+    span.textContent = match[0];
+    node.append(span);
+    offset = match.index + match[0].length;
+  }
+  node.append(document.createTextNode(line.slice(offset)));
 }
 function annotatedBlock(tool) {
   const root = document.createElement('div');
   root.className = 'annotated-call';
   const code = document.createElement('pre');
   code.className = 'call-code';
-  code.setAttribute('aria-label', 'Original ' + tool.name + ' preset block');
+  code.setAttribute('aria-label', tool.name + ' JSON tool definition');
   const note = document.createElement('aside');
   note.className = 'call-note';
   note.setAttribute('aria-live', 'polite');
   const caption = document.createElement('p');
   caption.className = 'call-caption';
-  caption.textContent = 'Verbatim preset block. Hover, focus, or tap an underlined line for annotations.';
+  caption.textContent = 'JSON definition from the preset. Hover, focus, or tap underlined lines for annotations.';
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.classList.add('call-wire');
   svg.setAttribute('aria-hidden', 'true');
@@ -57,24 +69,23 @@ function annotatedBlock(tool) {
     requestAnimationFrame(() => wire.classList.add('draw'));
   }
   const annotations = [
-    { match: line => line.startsWith('{{//'), label: 'Preset comment', note: 'This comment is part of the original prompt block. It explains how this entry is used.', tone: 'blue' },
-    { match: line => line === '[tool_schema]', label: 'Tool schema', note: 'The original definition supplied to the model when this tool loads.', tone: 'blue' },
-    { match: line => line === 'name = ' + JSON.stringify(tool.name), label: 'Exact tool name', note: 'This name identifies the tool in routing requests and output calls.', tone: 'orange' },
-    { match: line => line === '[tool_schema.arguments]', label: 'Argument definitions', note: 'The original fields, constraints, allowed answers, and questions follow below.', tone: 'teal' },
-    ...tool.fields.map(field => ({ match: line => line.startsWith(JSON.stringify(field.key) + ' ='), label: field.label, note: field.question, choices: field.choices, tone: 'teal' })),
-    { match: line => line === '[tool_schema.rules]', label: 'Tool rules', note: 'The original behavioral rules for applying this definition.', tone: 'orange' },
-    { match: line => line.includes('{{if '), label: 'Conditional macro', note: 'These macro conditions control when this block contributes to the prompt build.', tone: 'blue' },
-    { match: line => line.includes('{{addvar::'), label: 'Prompt assembly macro', note: 'This appends content to a variable used while assembling the prompt.', tone: 'blue' }
+    { match: line => /^  "name":/.test(line), label: 'Tool identifier', note: 'The model uses this exact identifier in JSON calls and next-turn routing requests.', tone: 'blue' },
+    { match: line => /^  "displayName":/.test(line), label: 'Display name', note: 'The readable title shown to people. Calls use the identifier above.', tone: 'blue' },
+    { match: line => /^  "description":/.test(line), label: 'Purpose and rules', note: 'This preserves the tool’s state type, job, scope, timing and behavioral rules.', tone: 'orange' },
+    { match: line => /^    "properties":/.test(line), label: 'Input fields', note: 'Each property defines a field the model may supply in its arguments object.', tone: 'teal' },
+    ...tool.fields.map(field => ({ match: line => line.trimStart().startsWith(JSON.stringify(field.key) + ':'), label: field.label, note: field.question, choices: field.choices, tone: 'teal' })),
+    { match: line => /^    "required":/.test(line), label: 'Required fields', note: 'Every listed property is required. Other defined properties are optional and are omitted when inapplicable.', tone: 'orange' },
+    { match: line => /^    "additionalProperties":/.test(line), label: 'Closed schema', note: 'False disallows extra argument names. This is a schema instruction; the preset’s regex is not a full JSON Schema validator.', tone: 'orange' }
   ];
   const lines = tool.source.split('\n');
   let firstAnnotation;
   for (const [index, line] of lines.entries()) {
     const item = annotations.find(annotation => annotation.match(line));
-    if (!item) { code.append(document.createTextNode(line + (index < lines.length - 1 ? '\n' : ''))); continue; }
+    if (!item) { appendJsonLine(code, line); if (index < lines.length - 1) code.append('\n'); continue; }
     const button = document.createElement('button');
     button.className = 'call-line';
     button.type = 'button';
-    button.textContent = line;
+    appendJsonLine(button, line);
     button.setAttribute('aria-pressed', 'false');
     button.onpointerenter = button.onfocus = button.onclick = () => select(button, item);
     code.append(button);

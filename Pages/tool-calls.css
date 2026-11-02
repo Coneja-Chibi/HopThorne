@@ -3,4 +3,4 @@
 @media(max-width:1050px){.annotated-call{grid-template-columns:1fr;gap:34px}.call-note{position:static}.call-code{min-height:0}.call-caption{grid-column:1}.call-note{max-width:none}}
 @media(max-width:700px){#summary{padding:18px}.call-code{font-size:13px;max-height:450px}.call-note{padding:16px}.call-line{line-height:1.7}.example-preview #think-call-preview{font-size:13px}}
 
-#chat-loaded-call{font:14px/1.6 var(--code);white-space:pre-wrap;overflow-wrap:anywhere;max-height:500px;overflow:auto}
+.json-key{color:#164b72}.json-string{color:#285839}.json-literal{color:#763b1b}

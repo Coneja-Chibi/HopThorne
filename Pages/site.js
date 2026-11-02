@@ -1,7 +1,8 @@
 const groups = window.HOP_GROUPS;
 const byId = id => document.getElementById(id);
 const exampleTool = groups.flatMap(group => group.tools).find(tool => tool.name === 'Trust, Promise & Apology Response');
-byId('request-preview').textContent = '[tool_call]\nname = "Next Tools"\n\n[tool_call.arguments]\n"🌙 Next tools" = ' + JSON.stringify([exampleTool.name]);
+const exampleArguments = { character: 'Rue', toward: 'Eli', event: 'Eli apologizes for hiding the letter.', response: 'Acknowledge without forgiving', trust_result: 'Too early to assess' };
+byId('request-preview').textContent = JSON.stringify({ name: 'next_tools', arguments: { next_tools: [exampleTool.identifier] } }, null, 2);
 byId('think-call-preview').textContent = '<think>\nAn apology has been made; Rue has not restored her trust.\n</think>\n\n' + callText(exampleTool);
 let groupIndex = 0;
 let visibleTools = [];
