@@ -12,6 +12,8 @@ You set the basics once (tense, viewpoint, length, your model, genres) and switc
 
 Visit the [HopThorne website](https://coneja-chibi.github.io/HopThorne/) or download [`HopThorne v1.json`](HopThorne%20v1.json).
 
+Want fewer tools? [**HopThorne Lite v1**](HopThorne%20Lite%20v1.json) has 28 essentials for scenes, emotions, relationships, decisions and continuity, with shorter instructions and no Dark Content section. It uses the same installation steps below.
+
 1. In SillyTavern, import the file as a **Chat Completion preset**.
 2. Turn on **Macros 2.0** (the Experimental Macro Engine).
 3. When SillyTavern asks, **allow the bundled regex scripts**. That's SillyTavern's built-in Regex feature, not an extension.

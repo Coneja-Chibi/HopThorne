@@ -1,5 +1,6 @@
-const groups = window.HOP_GROUPS;
+let groups = window.HOP_GROUPS;
 const byId = id => document.getElementById(id);
+const toolCount = catalog => catalog.reduce((count, group) => count + group.tools.length, 0);
 const exampleTool = groups.flatMap(group => group.tools).find(tool => tool.name === 'Trust, Promise & Apology Response');
 const exampleArguments = { character: 'Rue', toward: 'Eli', event: 'Eli apologizes for hiding the letter.', response: 'Acknowledge without forgiving', trust_result: 'Too early to assess' };
 byId('request-preview').textContent = JSON.stringify({ name: 'next_tools', arguments: { next_tools: [exampleTool.identifier] } }, null, 2);
@@ -54,5 +55,14 @@ function filter() {
   }
 }
 byId('find').oninput = filter;
+const editionSelect = byId('edition-select');
+for (const [value, catalog] of [['full', window.HOP_GROUPS], ['lite', window.HOP_LITE_GROUPS]]) {
+  editionSelect.querySelector('option[value="' + value + '"]').textContent = (value === 'full' ? 'Full' : 'Lite') + ': ' + toolCount(catalog) + ' tools';
+}
+editionSelect.onchange = () => {
+  groups = editionSelect.value === 'lite' ? window.HOP_LITE_GROUPS : window.HOP_GROUPS;
+  groupIndex = 0;
+  filter();
+};
 byId('explorer').hidden = false;
 filter();
